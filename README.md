@@ -8,6 +8,10 @@ post-quantum cryptography readiness.
 
 https://pqc-readiness-war-room.raybeecham2009.workers.dev
 
+## Release Notes
+
+- [v0.5 - Validation Narrative](docs/release-notes.md)
+
 ## Project Overview
 
 PQC Readiness War Room runs as a Cloudflare Worker. It evaluates:
