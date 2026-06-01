@@ -84,6 +84,7 @@ function buildPqcMigrationAnalysis({
   usesHttp3,
   cipherIsAead,
   targetAssessment,
+  discoveryAssessed,
 }) {
   let score = 0;
   const observed = [];
@@ -163,9 +164,20 @@ function buildPqcMigrationAnalysis({
 
   score = Math.min(score, 100);
 
+  const cappedByDiscovery = !discoveryAssessed && score >= 75;
+
+  if (cappedByDiscovery) {
+    score = 74;
+    gaps.push(
+      "Crypto discovery evidence has not been assessed, so readiness is capped below HIGH",
+    );
+  }
+
   const level = score >= 75 ? "HIGH" : score >= 50 ? "MEDIUM" : "LOW";
   const reasoning =
-    level === "HIGH"
+    cappedByDiscovery
+      ? "Strong modernization signals are present, but crypto discovery is not assessed, so readiness is capped below HIGH."
+      : level === "HIGH"
       ? "Observed modernization signals suggest a stronger migration foundation, but PQC support remains unverified."
       : level === "MEDIUM"
         ? "Some modernization signals are present, but important target or inventory evidence is still missing."
@@ -178,6 +190,7 @@ function buildPqcMigrationAnalysis({
     observed,
     gaps,
     unknowns,
+    cappedByDiscovery,
   };
 }
 
@@ -446,6 +459,7 @@ export default {
       usesHttp3,
       cipherIsAead,
       targetAssessment,
+      discoveryAssessed: cryptoDiscovery.status !== "NOT ASSESSED",
     });
 
     const recommendation =
@@ -480,6 +494,8 @@ export default {
         visibilityImpact,
         pqcMigrationReadiness: pqcMigrationAnalysis.level,
         pqcMigrationReadinessScore: pqcMigrationAnalysis.score,
+        pqcMigrationReadinessCappedByDiscovery:
+          pqcMigrationAnalysis.cappedByDiscovery,
         timestamp: new Date().toISOString(),
       }),
     );

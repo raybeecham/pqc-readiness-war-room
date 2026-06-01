@@ -33,6 +33,10 @@ The PQC Migration Readiness label describes migration preparedness from
 observable modernization signals. It does not verify post-quantum cryptography
 support.
 
+Readiness is capped below `HIGH` while Crypto Discovery is `NOT ASSESSED`.
+This keeps strong TLS modernization from being mistaken for enterprise
+migration readiness.
+
 The Crypto Discovery card is an evidence model. It lists required evidence,
 current tool coverage, and out-of-scope areas. It does not perform discovery
 against uploaded files, internal systems, repositories, databases, or vendor

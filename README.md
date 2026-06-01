@@ -216,6 +216,10 @@ Reasoning:
 The readiness label should describe migration preparedness, not verified PQC
 support.
 
+Readiness is capped below `HIGH` while Crypto Discovery is `NOT ASSESSED`.
+Strong TLS and HTTPS posture can show a good migration foundation, but not
+enterprise migration readiness by itself.
+
 ## Crypto Discovery Evidence Model
 
 The dashboard includes a Crypto Discovery card, but it does not perform full

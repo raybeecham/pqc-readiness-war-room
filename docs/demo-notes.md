@@ -24,6 +24,8 @@
 
    Explain that LOW, MEDIUM, or HIGH describes migration preparedness from
    observed modernization signals. It does not mean PQC support was verified.
+   While Crypto Discovery is NOT ASSESSED, readiness is capped below HIGH even
+   when TLS modernization signals are strong.
 
 6. Show Crypto Discovery.
 
