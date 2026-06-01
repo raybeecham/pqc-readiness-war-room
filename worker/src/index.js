@@ -479,6 +479,24 @@ export default {
       discoveryAssessed: cryptoDiscovery.status !== "NOT ASSESSED",
     });
 
+    const executiveSummary = {
+      transport:
+        modernizationPosture === "STRONG"
+          ? "Transport posture is strong."
+          : modernizationPosture === "MODERATE"
+            ? "Transport posture is moderate."
+            : "Transport posture is weak.",
+      pqc: `PQC support is ${pqcVerified ? "verified" : "not verified"}.`,
+      migration:
+        pqcMigrationAnalysis.level === "HIGH"
+          ? "Migration readiness is high based on observed posture signals."
+          : pqcMigrationAnalysis.level === "MEDIUM"
+            ? `Migration readiness is medium because ${cryptoDiscovery.status === "NOT ASSESSED" ? "crypto discovery is not assessed" : "important evidence is still missing"}.`
+            : "Migration readiness is low because observed evidence is limited.",
+      nextAction:
+        "Next action: collect endpoint, certificate, vendor, and application crypto evidence.",
+    };
+
     const recommendation =
       tlsModernizationScore >= 75
         ? "Strong TLS modernization posture. Next step: inventory cryptographic dependencies, validate vendor PQC roadmaps, and map visibility requirements."
@@ -574,6 +592,15 @@ export default {
 
     const validationDoNotInferRows = validationPlan.doNotInfer
       .map((item) => analysisLine(`? ${item}`))
+      .join("");
+
+    const executiveSummaryRows = [
+      executiveSummary.transport,
+      executiveSummary.pqc,
+      executiveSummary.migration,
+      executiveSummary.nextAction,
+    ]
+      .map((item) => analysisLine(item))
       .join("");
 
     const targetHtml = targetAssessment
@@ -995,6 +1022,14 @@ button:hover {
       <div class="metric yellow">${cryptoAgilityStatus}</div>
       <div class="small">
         No score is assigned until discovery, inventory, governance, vendor readiness, and migration planning evidence are assessed.
+      </div>
+    </div>
+
+    <div class="card span-12">
+      <h2>Executive Summary</h2>
+      <div class="signal-list">${executiveSummaryRows}</div>
+      <div class="small">
+        This summary explains the posture model without converting unknown signals into verified readiness.
       </div>
     </div>
 

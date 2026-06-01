@@ -106,6 +106,7 @@ The current Worker provides:
 
 - executive summary cards for TLS modernization, PQC verification, migration
   readiness, and crypto-agility status
+- an Executive Summary card for the plain-language posture narrative
 - TLS Modernization Score
 - PQC verification status
 - PQC Migration Readiness analysis
@@ -189,6 +190,19 @@ This connects directly to:
 - the Cloudflare demo
 - the PQC readiness story
 - visibility planning for modern transport protocols
+
+## Executive Summary
+
+The dashboard includes an Executive Summary card that turns the posture model
+into a short narrative:
+
+- transport posture
+- PQC verification status
+- migration readiness
+- next validation action
+
+The summary does not add new evidence or change unknown signals into verified
+signals.
 
 ## PQC Readiness Analysis
 
