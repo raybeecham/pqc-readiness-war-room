@@ -1,5 +1,34 @@
 # Release Notes
 
+## v0.7 - Target Comparison Mode
+
+This release adds side-by-side comparison for public HTTPS posture signals while
+keeping the tool stateless and bounded.
+
+### Added
+
+- optional `compare` query parameter
+- comparison of the primary target plus up to three additional public hostnames
+- side-by-side rows for HTTPS reachability, HTTP status, HSTS, HTTP/3
+  advertisement through `Alt-Svc`, CSP, limited assessment status, and posture
+  score
+- comparison input in the existing assessment form
+
+### Maintained Boundaries
+
+- no storage
+- no uploads
+- no databases
+- no third-party APIs
+- no PQC verification claim
+- no TLS key exchange group enumeration
+
+### Example
+
+```text
+?target=github.com&compare=cloudflare.com,nist.gov,nsa.gov
+```
+
 ## v0.6.1 - Evidence Confidence Polish
 
 This patch tightens Evidence Ledger wording so missing target header signals are

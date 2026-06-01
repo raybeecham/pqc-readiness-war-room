@@ -50,6 +50,10 @@ The Evidence Ledger improves traceability by mapping signals to sources and
 classifications. It does not add scanner capability, perform inventory, verify
 PQC support, or prove organizational crypto-agility.
 
+Target Comparison Mode compares public HTTPS posture signals for a small set of
+user-supplied hostnames. It does not store results, compare private systems,
+verify PQC support, or enumerate TLS key exchange groups.
+
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic
 scanning, endpoint inventory, vendor evidence, architecture review, or

@@ -117,6 +117,7 @@ The current Worker provides:
 - Crypto Discovery evidence model
 - Validation Plan
 - Evidence Ledger
+- Target Comparison Mode
 - Crypto-Agility status placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
@@ -224,6 +225,31 @@ source:
 The ledger is meant to make the assessment easier to explain and audit. It does
 not create new evidence and does not turn unknown PQC signals into verified
 readiness.
+
+## Target Comparison Mode
+
+The dashboard supports a lightweight side-by-side comparison of public HTTPS
+posture signals.
+
+Example:
+
+```text
+?target=github.com&compare=cloudflare.com,nist.gov,nsa.gov
+```
+
+Comparison mode assesses the primary target plus up to three additional public
+hostnames. It compares:
+
+- HTTPS reachability
+- HTTP response status
+- HSTS observation
+- HTTP/3 advertisement through `Alt-Svc`
+- CSP observation
+- limited assessment status
+- posture score
+
+This mode does not store results, call third-party APIs, verify PQC support, or
+enumerate TLS key exchange groups.
 
 ## PQC Readiness Analysis
 
@@ -344,9 +370,12 @@ v0.6:
 - Signal source transparency
 - observed, derived, unknown, not verified, and not assessed classifications
 
-Future:
+v0.7:
 
 - Target Comparison Mode
+
+Future:
+
 - Migration Planning
 - CAMM Assessment
 

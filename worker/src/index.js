@@ -10,6 +10,8 @@ function normalizeTarget(rawTarget) {
   return target.toLowerCase();
 }
 
+const MAX_COMPARE_TARGETS = 3;
+
 function isValidPublicHostname(hostname) {
   if (!hostname) return false;
   if (hostname === "localhost") return false;
@@ -68,14 +70,107 @@ function confidenceFromTarget(signals) {
   return "LOW";
 }
 
+async function assessTarget(target) {
+  if (!isValidPublicHostname(target)) {
+    return {
+      target,
+      valid: false,
+      reachable: false,
+      error: "Invalid or non-public hostname.",
+      score: 0,
+      confidence: "LOW",
+    };
+  }
+
+  const targetUrl = `https://${target}/`;
+
+  try {
+    const response = await fetch(targetUrl, {
+      method: "GET",
+      redirect: "follow",
+      headers: {
+        "User-Agent": "PQC-Readiness-War-Room/0.7",
+      },
+    });
+
+    const headers = response.headers;
+
+    const signals = {
+      target,
+      valid: true,
+      reachable: true,
+      finalUrl: response.url,
+      status: response.status,
+      limited:
+        response.status === 401 ||
+        response.status === 403 ||
+        response.status === 429 ||
+        response.status === 503,
+      httpsRedirectOrSuccess: response.url.startsWith("https://"),
+      hsts: headerValue(headers, "strict-transport-security"),
+      altSvc: headerValue(headers, "alt-svc"),
+      csp: headerValue(headers, "content-security-policy"),
+      xFrameOptions: headerValue(headers, "x-frame-options"),
+      xContentTypeOptions: headerValue(headers, "x-content-type-options"),
+      referrerPolicy: headerValue(headers, "referrer-policy"),
+      permissionsPolicy: headerValue(headers, "permissions-policy"),
+      server: headerValue(headers, "server"),
+      cfCacheStatus: headerValue(headers, "cf-cache-status"),
+    };
+
+    return {
+      ...signals,
+      score: scoreTargetSignals(signals),
+      confidence: confidenceFromTarget(signals),
+    };
+  } catch (err) {
+    return {
+      target,
+      valid: true,
+      reachable: false,
+      error: err.message || "Fetch failed.",
+      score: 0,
+      confidence: "LOW",
+    };
+  }
+}
+
+function parseCompareTargets(rawCompare, primaryTarget) {
+  const selected = [];
+
+  for (const item of rawCompare.split(",")) {
+    const candidate = normalizeTarget(item);
+
+    if (!candidate) continue;
+    if (candidate === primaryTarget) continue;
+    if (selected.includes(candidate)) continue;
+
+    selected.push(candidate);
+  }
+
+  return {
+    targets: selected.slice(0, MAX_COMPARE_TARGETS),
+    truncated: selected.length > MAX_COMPARE_TARGETS,
+  };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function signalLine(observed, text) {
   return observed
-    ? `<div class="signal observed">✓ ${text}</div>`
-    : `<div class="signal missing">✕ ${text}</div>`;
+    ? `<div class="signal observed">✓ ${escapeHtml(text)}</div>`
+    : `<div class="signal missing">✕ ${escapeHtml(text)}</div>`;
 }
 
 function analysisLine(text) {
-  return `<div class="checkbox-line">${text}</div>`;
+  return `<div class="checkbox-line">${escapeHtml(text)}</div>`;
 }
 
 function evidenceClass(confidence) {
@@ -85,10 +180,80 @@ function evidenceClass(confidence) {
 function evidenceRow({ signal, source, result, confidence }) {
   return `
     <div class="ledger-row">
-      <div class="ledger-signal">${signal}</div>
-      <div class="ledger-source">${source}</div>
-      <div class="ledger-result">${result}</div>
-      <div><span class="badge ${evidenceClass(confidence)}">${confidence}</span></div>
+      <div class="ledger-signal">${escapeHtml(signal)}</div>
+      <div class="ledger-source">${escapeHtml(source)}</div>
+      <div class="ledger-result">${escapeHtml(result)}</div>
+      <div><span class="badge ${evidenceClass(confidence)}">${escapeHtml(confidence)}</span></div>
+    </div>
+  `;
+}
+
+function scoreBadgeClass(score) {
+  if (score >= 75) return "pass";
+  if (score >= 50) return "warn";
+  return "fail";
+}
+
+function comparisonBadge(label, cls) {
+  return `<span class="badge ${cls}">${escapeHtml(label)}</span>`;
+}
+
+function comparisonObservedBadge(observed) {
+  return comparisonBadge(observed ? "Observed" : "Not observed", observed ? "pass" : "not-observed");
+}
+
+function comparisonRow(assessment, role) {
+  const targetLabel = role
+    ? `${assessment.target} (${role})`
+    : assessment.target;
+
+  if (!assessment.valid) {
+    return `
+      <div class="comparison-row">
+        <div class="comparison-target">${escapeHtml(targetLabel)}</div>
+        <div>${comparisonBadge("No", "fail")}</div>
+        <div>${comparisonBadge("Invalid", "fail")}</div>
+        <div>${comparisonBadge("Not run", "not-run")}</div>
+        <div>${comparisonBadge("Not run", "not-run")}</div>
+        <div>${comparisonBadge("Not run", "not-run")}</div>
+        <div>${comparisonBadge("No", "not-observed")}</div>
+        <div>${comparisonBadge("0/100", "fail")}</div>
+      </div>
+    `;
+  }
+
+  if (!assessment.reachable) {
+    return `
+      <div class="comparison-row">
+        <div class="comparison-target">${escapeHtml(targetLabel)}</div>
+        <div>${comparisonBadge("No", "fail")}</div>
+        <div>${comparisonBadge("No response", "fail")}</div>
+        <div>${comparisonBadge("Not observed", "not-observed")}</div>
+        <div>${comparisonBadge("Not observed", "not-observed")}</div>
+        <div>${comparisonBadge("Not observed", "not-observed")}</div>
+        <div>${comparisonBadge("Unknown", "unknown")}</div>
+        <div>${comparisonBadge("0/100", "fail")}</div>
+      </div>
+    `;
+  }
+
+  const statusClass =
+    assessment.status >= 200 && assessment.status < 400
+      ? "pass"
+      : assessment.limited
+        ? "warn"
+        : "fail";
+
+  return `
+    <div class="comparison-row">
+      <div class="comparison-target">${escapeHtml(targetLabel)}</div>
+      <div>${comparisonBadge("Yes", "pass")}</div>
+      <div>${comparisonBadge(String(assessment.status), statusClass)}</div>
+      <div>${comparisonObservedBadge(assessment.hsts !== "Not observed")}</div>
+      <div>${comparisonObservedBadge(assessment.altSvc.toLowerCase().includes("h3"))}</div>
+      <div>${comparisonObservedBadge(assessment.csp !== "Not observed")}</div>
+      <div>${comparisonBadge(assessment.limited ? "Yes" : "No", assessment.limited ? "warn" : "not-observed")}</div>
+      <div>${comparisonBadge(`${assessment.score}/100`, scoreBadgeClass(assessment.score))}</div>
     </div>
   `;
 }
@@ -216,6 +381,9 @@ export default {
 
     const rawTarget = url.searchParams.get("target") || "";
     const target = normalizeTarget(rawTarget);
+    const rawCompare = url.searchParams.get("compare") || "";
+    const compareSelection = parseCompareTargets(rawCompare, target);
+    const compareTargets = compareSelection.targets;
 
     const protocol = cf.httpProtocol || "Unknown";
     const tlsVersion = cf.tlsVersion || "Unknown";
@@ -418,72 +586,20 @@ export default {
             telemetrySources: "Browser devtools, proxy logs, edge logs.",
           };
 
-    let targetAssessment = null;
-
-    if (target) {
-      if (!isValidPublicHostname(target)) {
-        targetAssessment = {
-          target,
-          valid: false,
-          reachable: false,
-          error: "Invalid or non-public hostname.",
-          score: 0,
-          confidence: "LOW",
-        };
-      } else {
-        const targetUrl = `https://${target}/`;
-
-        try {
-          const response = await fetch(targetUrl, {
-            method: "GET",
-            redirect: "follow",
-            headers: {
-              "User-Agent": "PQC-Readiness-War-Room/0.4",
-            },
-          });
-
-          const headers = response.headers;
-
-          const signals = {
-            target,
-            valid: true,
-            reachable: true,
-            finalUrl: response.url,
-            status: response.status,
-            limited:
-              response.status === 401 ||
-              response.status === 403 ||
-              response.status === 429 ||
-              response.status === 503,
-            httpsRedirectOrSuccess: response.url.startsWith("https://"),
-            hsts: headerValue(headers, "strict-transport-security"),
-            altSvc: headerValue(headers, "alt-svc"),
-            csp: headerValue(headers, "content-security-policy"),
-            xFrameOptions: headerValue(headers, "x-frame-options"),
-            xContentTypeOptions: headerValue(headers, "x-content-type-options"),
-            referrerPolicy: headerValue(headers, "referrer-policy"),
-            permissionsPolicy: headerValue(headers, "permissions-policy"),
-            server: headerValue(headers, "server"),
-            cfCacheStatus: headerValue(headers, "cf-cache-status"),
-          };
-
-          targetAssessment = {
-            ...signals,
-            score: scoreTargetSignals(signals),
-            confidence: confidenceFromTarget(signals),
-          };
-        } catch (err) {
-          targetAssessment = {
-            target,
-            valid: true,
-            reachable: false,
-            error: err.message || "Fetch failed.",
-            score: 0,
-            confidence: "LOW",
-          };
-        }
-      }
-    }
+    const targetAssessment = target ? await assessTarget(target) : null;
+    const comparisonTargets = [
+      ...(target ? [target] : []),
+      ...compareTargets,
+    ];
+    const comparisonAssessments = rawCompare.trim()
+      ? await Promise.all(
+          comparisonTargets.map((comparisonTarget) =>
+            comparisonTarget === target && targetAssessment
+              ? targetAssessment
+              : assessTarget(comparisonTarget),
+          ),
+        )
+      : [];
 
     const pqcMigrationAnalysis = buildPqcMigrationAnalysis({
       tlsIsModern,
@@ -764,6 +880,41 @@ export default {
       .join("");
 
     const evidenceLedgerRows = evidenceLedger.map(evidenceRow).join("");
+    const comparisonRows = comparisonAssessments
+      .map((assessment, index) =>
+        comparisonRow(assessment, index === 0 && target ? "Primary" : "Compare"),
+      )
+      .join("");
+    const comparisonLimitNote = compareSelection.truncated
+      ? `<div class="warning-box">Comparison is capped at ${MAX_COMPARE_TARGETS} additional public targets for this lightweight Worker demo.</div>`
+      : "";
+    const comparisonHtml = rawCompare.trim()
+      ? `
+        <div class="card span-12">
+          <h2>Target Comparison</h2>
+          <div class="comparison-table">
+            <div class="comparison-header">
+              <div>Target</div>
+              <div>HTTPS</div>
+              <div>Status</div>
+              <div>HSTS</div>
+              <div>HTTP/3</div>
+              <div>CSP</div>
+              <div>Limited</div>
+              <div>Score</div>
+            </div>
+            ${
+              comparisonRows ||
+              `<div class="comparison-empty">No comparison targets selected after duplicate filtering.</div>`
+            }
+          </div>
+          ${comparisonLimitNote}
+          <div class="small">
+            This compares public HTTPS posture signals only. It does not verify PQC support, enumerate TLS key exchange groups, or store results.
+          </div>
+        </div>
+      `
+      : "";
 
     const targetHtml = targetAssessment
       ? targetAssessment.reachable
@@ -1153,12 +1304,51 @@ button:hover {
   overflow-wrap: anywhere;
 }
 
+.comparison-table {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #071014;
+  overflow: hidden;
+}
+
+.comparison-header,
+.comparison-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 0.9fr 0.9fr 0.9fr 0.9fr 0.8fr;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  align-items: center;
+}
+
+.comparison-header {
+  color: #88fff0;
+  font-weight: bold;
+  background: #0d171d;
+}
+
+.comparison-row:last-child {
+  border-bottom: none;
+}
+
+.comparison-target {
+  color: #ffffff;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.comparison-empty {
+  color: #ffd166;
+  padding: 10px;
+}
+
 @media (max-width: 900px) {
-  .ledger-header {
+  .ledger-header,
+  .comparison-header {
     display: none;
   }
 
-  .ledger-row {
+  .ledger-row,
+  .comparison-row {
     grid-template-columns: 1fr;
   }
 }
@@ -1193,7 +1383,8 @@ button:hover {
   </div>
 
   <form class="scan-form" method="GET">
-    <input name="target" placeholder="Enter target domain, e.g. nist.gov" value="${target || ""}">
+    <input name="target" placeholder="Enter target domain, e.g. github.com" value="${escapeHtml(target || "")}">
+    <input name="compare" placeholder="Compare up to 3: cloudflare.com,nist.gov,nsa.gov" value="${escapeHtml(compareTargets.join(","))}">
     <button type="submit">Run Target Assessment</button>
     <button type="button" onclick="window.location='/'">Clear</button>
   </form>
@@ -1264,6 +1455,8 @@ button:hover {
         Observed rows come from Worker request metadata or target response headers. Derived rows come from this posture model. Unknown, not verified, and not assessed rows are intentionally not treated as proof.
       </div>
     </div>
+
+    ${comparisonHtml}
 
     <div class="card span-8">
       <h2>Target HTTPS Posture Assessment</h2>
@@ -1385,7 +1578,8 @@ button:hover {
       <div class="checkbox-line">✓ Phase 4: Crypto Discovery Evidence Model</div>
       <div class="checkbox-line">✓ Phase 5: Validation Plan</div>
       <div class="checkbox-line">✓ Phase 6: Evidence Ledger</div>
-      <div class="checkbox-line">□ Phase 7: Migration Planning</div>
+      <div class="checkbox-line">✓ Phase 7: Target Comparison Mode</div>
+      <div class="checkbox-line">□ Phase 8: Migration Planning</div>
     </div>
 
     <div class="card span-6">
