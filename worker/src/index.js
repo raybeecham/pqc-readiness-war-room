@@ -203,6 +203,43 @@ export default {
         ? "HTTP/2 over TLS provides a familiar TCP-based enterprise visibility posture."
         : "Protocol visibility is unclear. Validate from browser, proxy, and edge logs.";
 
+    const protocolIntelligence = usesHttp3
+      ? {
+          protocol: "HTTP/3",
+          interpretation: "QUIC-aware posture",
+          whyItMatters:
+            "QUIC can reduce traditional TCP-centric inspection assumptions.",
+          guidanceHeading: "Operational Impact",
+          operationalImpact:
+            "Visibility shifts toward edge telemetry, endpoint telemetry, application logs, and policy control points.",
+          telemetrySources:
+            "Edge telemetry, endpoint telemetry, application logs, policy control points.",
+        }
+      : usesHttp2
+        ? {
+            protocol: "HTTP/2",
+            interpretation: "TCP-based encrypted transport",
+            whyItMatters:
+              "HTTP/2 remains easier to reason about with traditional TCP-centric network tooling, but payload remains encrypted.",
+            guidanceHeading: "Operational Impact",
+            operationalImpact:
+              "Use flow metadata, endpoint telemetry, application logs, and authorized inspection where justified.",
+            telemetrySources:
+              "Flow metadata, endpoint telemetry, application logs, authorized inspection where justified.",
+          }
+        : {
+            protocol: protocol === "Unknown" ? "Unknown" : protocol,
+            interpretation:
+              protocol === "Unknown"
+                ? "Protocol could not be determined from the Worker context."
+                : "Protocol was observed, but it is not HTTP/2 or HTTP/3 in this request context.",
+            whyItMatters: visibilityImpact,
+            guidanceHeading: "Recommendation",
+            operationalImpact:
+              "Validate using browser devtools, proxy logs, and edge logs before drawing protocol visibility conclusions.",
+            telemetrySources: "Browser devtools, proxy logs, edge logs.",
+          };
+
     let targetAssessment = null;
 
     if (target) {
@@ -747,6 +784,18 @@ button:hover {
       <div class="kv"><span class="label">Cipher:</span><span class="value">${cipher}</span></div>
       <div class="kv"><span class="label">Edge:</span><span class="value">${colo}</span></div>
       <div class="kv"><span class="label">Visibility:</span><span class="value">${visibilityImpact}</span></div>
+    </div>
+
+    <div class="card span-4">
+      <h2>Protocol Intelligence</h2>
+      <div class="kv"><span class="label">Protocol:</span><span class="value">${protocolIntelligence.protocol}</span></div>
+      <div class="kv"><span class="label">Interpretation:</span><span class="value">${protocolIntelligence.interpretation}</span></div>
+      <h3>Why It Matters</h3>
+      <div class="value">${protocolIntelligence.whyItMatters}</div>
+      <h3>${protocolIntelligence.guidanceHeading}</h3>
+      <div class="value">${protocolIntelligence.operationalImpact}</div>
+      <h3>Recommended Telemetry</h3>
+      <div class="value">${protocolIntelligence.telemetrySources}</div>
     </div>
 
     <div class="card span-4">
