@@ -89,7 +89,7 @@ async function assessTarget(target) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "PQC-Readiness-War-Room/0.9",
+        "User-Agent": "PQC-Readiness-War-Room/0.9.1",
       },
     });
 
@@ -1503,7 +1503,7 @@ button:hover {
 
 @media print {
   @page {
-    margin: 0.55in;
+    margin: 0.45in;
   }
 
   body {
@@ -1533,7 +1533,7 @@ button:hover {
 
   .grid > .print-section {
     display: block !important;
-    margin: 0 0 14px;
+    margin: 0 0 10px;
   }
 
   .card {
@@ -1541,9 +1541,9 @@ button:hover {
     border: 1px solid #999999 !important;
     color: #111111 !important;
     min-height: 0;
-    padding: 14px;
-    break-inside: avoid;
-    page-break-inside: avoid;
+    padding: 10px;
+    break-inside: auto;
+    page-break-inside: auto;
   }
 
   h1,
@@ -1569,12 +1569,52 @@ button:hover {
   }
 
   h1 {
-    font-size: 26px;
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+
+  h2 {
+    font-size: 15px !important;
+    margin-bottom: 7px !important;
+  }
+
+  h3 {
+    font-size: 11px !important;
+    margin: 6px 0 3px !important;
   }
 
   .subtitle {
     color: #333333 !important;
-    margin-bottom: 14px;
+    font-size: 10px;
+    margin: 0 0 8px;
+  }
+
+  .value,
+  .small,
+  .checkbox-line,
+  .ledger-row,
+  .comparison-row,
+  .brief-list {
+    font-size: 9.5px !important;
+    line-height: 1.28 !important;
+  }
+
+  .executive-brief > .small {
+    display: none;
+  }
+
+  .brief-grid {
+    gap: 5px 10px;
+  }
+
+  .brief-list {
+    padding-left: 14px;
+  }
+
+  .kv {
+    grid-template-columns: 82px 1fr;
+    gap: 4px;
+    margin: 2px 0;
   }
 
   .executive-brief,
@@ -1589,6 +1629,14 @@ button:hover {
   .comparison-header {
     background: #eeeeee !important;
     color: #111111 !important;
+    font-size: 9.5px !important;
+    padding: 6px;
+  }
+
+  .ledger-row,
+  .comparison-row {
+    gap: 6px;
+    padding: 6px;
   }
 
   .ledger-row,
@@ -1599,6 +1647,8 @@ button:hover {
   .badge {
     color: #111111 !important;
     border-color: #555555 !important;
+    font-size: 8.5px !important;
+    padding: 2px 4px;
   }
 }
 </style>
@@ -1676,6 +1726,8 @@ button:hover {
 
     ${executiveBriefHtml}
 
+    ${comparisonHtml}
+
     <div class="card span-12 print-section">
       <h2>Evidence Ledger</h2>
       <div class="ledger">
@@ -1691,8 +1743,6 @@ button:hover {
         Observed rows come from Worker request metadata or target response headers. Derived rows come from this posture model. Unknown, not verified, and not assessed rows are intentionally not treated as proof.
       </div>
     </div>
-
-    ${comparisonHtml}
 
     <div class="card span-8">
       <h2>Target HTTPS Posture Assessment</h2>

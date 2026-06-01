@@ -1,5 +1,23 @@
 # Release Notes
 
+## v0.9.1 - Print Layout Polish
+
+This patch tightens the browser print output after reviewing a generated PDF.
+
+### Changed
+
+- report order now places Target Comparison before Evidence Ledger
+- print spacing is more compact
+- long report sections are allowed to flow instead of forcing sparse pages
+- internal Executive Brief note is hidden in print output
+
+### Maintained Boundaries
+
+- no PDF generation library
+- no report storage
+- no export backend
+- no external APIs
+
 ## v0.9 - Print / Report View
 
 This release adds a browser print workflow for clean briefing output without
