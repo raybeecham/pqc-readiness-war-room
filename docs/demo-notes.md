@@ -20,7 +20,12 @@
    deliberately not treated as proven. The tool does not prove ML-KEM, hybrid
    PQC, ECH, complete crypto inventory, or organizational crypto-agility.
 
-5. Close with the key takeaway.
+5. Show PQC Migration Readiness.
+
+   Explain that LOW, MEDIUM, or HIGH describes migration preparedness from
+   observed modernization signals. It does not mean PQC support was verified.
+
+6. Close with the key takeaway.
 
    "A modern TLS posture is a prerequisite for PQC migration, but it is not proof of PQC readiness."
 

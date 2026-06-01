@@ -105,7 +105,8 @@ Examples:
 The current Worker provides:
 
 - TLS Modernization Score
-- PQC Readiness model
+- PQC verification status
+- PQC Migration Readiness analysis
 - Crypto-Agility Score placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
@@ -187,8 +188,8 @@ This connects directly to:
 
 ## PQC Readiness Analysis
 
-The tool should not guess PQC readiness. The next analysis layer should examine
-observable modernization signals and then clearly state what remains unknown.
+The tool does not guess PQC support. The analysis layer examines observable
+modernization signals and then clearly states what remains unknown.
 
 Inputs to analyze:
 

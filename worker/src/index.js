@@ -74,6 +74,113 @@ function signalLine(observed, text) {
     : `<div class="signal missing">✕ ${text}</div>`;
 }
 
+function analysisLine(text) {
+  return `<div class="checkbox-line">${text}</div>`;
+}
+
+function buildPqcMigrationAnalysis({
+  tlsIsModern,
+  httpIsModern,
+  usesHttp3,
+  cipherIsAead,
+  targetAssessment,
+}) {
+  let score = 0;
+  const observed = [];
+  const gaps = [];
+  const unknowns = [
+    "ML-KEM support not proven",
+    "Hybrid PQC key exchange support not proven",
+    "ECH support not proven",
+    "Cryptographic inventory coverage not proven",
+    "Organizational crypto-agility not proven",
+  ];
+
+  if (tlsIsModern) {
+    score += 25;
+    observed.push("TLS 1.3 observed on the browser-to-edge connection");
+  } else {
+    gaps.push("TLS 1.3 was not observed on the browser-to-edge connection");
+  }
+
+  if (cipherIsAead) {
+    score += 15;
+    observed.push("AEAD-like cipher observed on the browser-to-edge connection");
+  } else {
+    gaps.push("AEAD cipher posture could not be confirmed");
+  }
+
+  if (usesHttp3) {
+    score += 15;
+    observed.push("HTTP/3 observed on the browser-to-edge connection");
+  } else if (httpIsModern) {
+    score += 10;
+    observed.push("Modern HTTP protocol observed on the browser-to-edge connection");
+  } else {
+    gaps.push("Modern HTTP protocol was not confirmed");
+  }
+
+  if (!targetAssessment) {
+    gaps.push("No target HTTPS posture assessment has been run");
+  } else if (!targetAssessment.reachable) {
+    gaps.push("Target HTTPS endpoint was not reachable");
+  } else {
+    score += 15;
+    observed.push("Target HTTPS endpoint reachable");
+
+    if (targetAssessment.httpsRedirectOrSuccess) {
+      score += 10;
+      observed.push("Target final URL uses HTTPS");
+    } else {
+      gaps.push("Target final URL did not confirm HTTPS");
+    }
+
+    if (targetAssessment.hsts !== "Not observed") {
+      score += 5;
+      observed.push("HSTS observed on target response");
+    } else {
+      gaps.push("HSTS was not observed on target response");
+    }
+
+    if (targetAssessment.altSvc.toLowerCase().includes("h3")) {
+      score += 10;
+      observed.push("Target advertises HTTP/3 through Alt-Svc");
+    } else {
+      gaps.push("Target HTTP/3 support was not observed through Alt-Svc");
+    }
+
+    if (targetAssessment.csp !== "Not observed") {
+      score += 5;
+      observed.push("Content Security Policy observed on target response");
+    }
+
+    if (targetAssessment.limited) {
+      gaps.push(
+        "Target response may be limited by challenge, denial, rate limit, or intermediary behavior",
+      );
+    }
+  }
+
+  score = Math.min(score, 100);
+
+  const level = score >= 75 ? "HIGH" : score >= 50 ? "MEDIUM" : "LOW";
+  const reasoning =
+    level === "HIGH"
+      ? "Observed modernization signals suggest a stronger migration foundation, but PQC support remains unverified."
+      : level === "MEDIUM"
+        ? "Some modernization signals are present, but important target or inventory evidence is still missing."
+        : "Observed evidence is too limited to treat the environment as migration-ready.";
+
+  return {
+    level,
+    score,
+    reasoning,
+    observed,
+    gaps,
+    unknowns,
+  };
+}
+
 export default {
   async fetch(request) {
     const cf = request.cf || {};
@@ -191,8 +298,8 @@ export default {
     if (tlsModernizationScore >= 75) modernizationPosture = "STRONG";
     if (tlsModernizationScore < 55) modernizationPosture = "WEAK";
 
-    const pqcReadinessLevel = pqcVerified ? "VERIFIED" : "PARTIAL";
-    const pqcReadinessScore = pqcVerified ? 80 : 60;
+    const pqcReadinessLevel = pqcVerified ? "VERIFIED" : "NOT VERIFIED";
+    const pqcReadinessScore = pqcVerified ? 80 : 0;
 
     const cryptoAgilityScore = 15;
     const cryptoAgilityStatus = "NOT ASSESSED";
@@ -307,6 +414,14 @@ export default {
       }
     }
 
+    const pqcMigrationAnalysis = buildPqcMigrationAnalysis({
+      tlsIsModern,
+      httpIsModern,
+      usesHttp3,
+      cipherIsAead,
+      targetAssessment,
+    });
+
     const recommendation =
       tlsModernizationScore >= 75
         ? "Strong TLS modernization posture. Next step: inventory cryptographic dependencies, validate vendor PQC roadmaps, and map visibility requirements."
@@ -337,6 +452,8 @@ export default {
         echStatus,
         pqcVerified,
         visibilityImpact,
+        pqcMigrationReadiness: pqcMigrationAnalysis.level,
+        pqcMigrationReadinessScore: pqcMigrationAnalysis.score,
         timestamp: new Date().toISOString(),
       }),
     );
@@ -362,6 +479,18 @@ export default {
         </div>
       `;
       })
+      .join("");
+
+    const observedReadinessRows = pqcMigrationAnalysis.observed.length
+      ? pqcMigrationAnalysis.observed.map((item) => analysisLine(`✓ ${item}`)).join("")
+      : analysisLine("No positive migration readiness signals observed yet");
+
+    const readinessGapRows = pqcMigrationAnalysis.gaps.length
+      ? pqcMigrationAnalysis.gaps.map((item) => analysisLine(`□ ${item}`)).join("")
+      : analysisLine("No major observed-signal gaps from this assessment");
+
+    const readinessUnknownRows = pqcMigrationAnalysis.unknowns
+      .map((item) => analysisLine(`? ${item}`))
       .join("");
 
     const targetHtml = targetAssessment
@@ -749,14 +878,26 @@ button:hover {
     </div>
 
     <div class="card span-4">
-      <h2>PQC Readiness</h2>
-      <div class="metric yellow">${pqcReadinessLevel}</div>
+      <h2>PQC Verification</h2>
+      <div class="metric ${pqcVerified ? "green" : "red"}">${pqcReadinessLevel}</div>
       <div class="bar">
-        <div class="fill-yellow" style="width:${pqcReadinessScore}%"></div>
+        <div class="${pqcVerified ? "fill" : "fill-red"}" style="width:${pqcReadinessScore}%"></div>
       </div>
       <div class="small">
         Score: <b>${pqcReadinessScore}/100</b><br>
         PQC support is not directly verified from this Worker alone.
+      </div>
+    </div>
+
+    <div class="card span-4">
+      <h2>PQC Migration Readiness</h2>
+      <div class="metric ${pqcMigrationAnalysis.level === "HIGH" ? "green" : pqcMigrationAnalysis.level === "MEDIUM" ? "yellow" : "red"}">${pqcMigrationAnalysis.level}</div>
+      <div class="bar">
+        <div class="${pqcMigrationAnalysis.level === "HIGH" ? "fill" : pqcMigrationAnalysis.level === "MEDIUM" ? "fill-yellow" : "fill-red"}" style="width:${pqcMigrationAnalysis.score}%"></div>
+      </div>
+      <div class="small">
+        Score: <b>${pqcMigrationAnalysis.score}/100</b><br>
+        ${pqcMigrationAnalysis.reasoning}
       </div>
     </div>
 
@@ -828,6 +969,19 @@ button:hover {
       </div>
     </div>
 
+    <div class="card span-8">
+      <h2>PQC Readiness Analysis</h2>
+      <h3>Observed Modernization Evidence</h3>
+      <div class="signal-list">${observedReadinessRows}</div>
+      <h3>Readiness Gaps</h3>
+      <div class="signal-list">${readinessGapRows}</div>
+      <h3>Unknown Signals</h3>
+      <div class="signal-list">${readinessUnknownRows}</div>
+      <div class="small">
+        This analysis estimates migration preparedness from observable posture signals. It does not verify PQC support or enumerate TLS key exchange groups.
+      </div>
+    </div>
+
     <div class="card span-7">
       <h2>Readiness Findings</h2>
       ${findingRows}
@@ -845,7 +999,7 @@ button:hover {
       <h2>Platform Roadmap</h2>
       <div class="checkbox-line">✓ Phase 1: TLS Modernization</div>
       <div class="checkbox-line">✓ Phase 2: HTTPS Posture Assessment</div>
-      <div class="checkbox-line">□ Phase 3: PQC Readiness Analysis</div>
+      <div class="checkbox-line">✓ Phase 3: PQC Readiness Analysis</div>
       <div class="checkbox-line">□ Phase 4: Cryptographic Discovery</div>
       <div class="checkbox-line">□ Phase 5: CAMM Assessment</div>
       <div class="checkbox-line">□ Phase 6: Migration Planning</div>
