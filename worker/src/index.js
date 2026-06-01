@@ -89,7 +89,7 @@ async function assessTarget(target) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "PQC-Readiness-War-Room/0.8",
+        "User-Agent": "PQC-Readiness-War-Room/0.9",
       },
     });
 
@@ -954,7 +954,7 @@ export default {
       : "";
     const comparisonHtml = rawCompare.trim()
       ? `
-        <div class="card span-12">
+        <div class="card span-12 print-section">
           <h2>Target Comparison</h2>
           <div class="comparison-table">
             <div class="comparison-header">
@@ -980,7 +980,7 @@ export default {
       `
       : "";
     const executiveBriefHtml = `
-      <div class="card span-12 executive-brief">
+      <div class="card span-12 executive-brief print-section">
         <h2>Executive Brief</h2>
         <div class="brief-grid">
           <div>
@@ -1500,6 +1500,107 @@ button:hover {
   margin-top: 18px;
   font-size: 13px;
 }
+
+@media print {
+  @page {
+    margin: 0.55in;
+  }
+
+  body {
+    background: #ffffff;
+    color: #111111;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .wrapper {
+    max-width: none;
+    padding: 0;
+  }
+
+  .banner,
+  .scan-form,
+  .footer {
+    display: none !important;
+  }
+
+  .grid {
+    display: block;
+  }
+
+  .grid > .card {
+    display: none !important;
+  }
+
+  .grid > .print-section {
+    display: block !important;
+    margin: 0 0 14px;
+  }
+
+  .card {
+    background: #ffffff !important;
+    border: 1px solid #999999 !important;
+    color: #111111 !important;
+    min-height: 0;
+    padding: 14px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3,
+  .value,
+  .label,
+  .small,
+  .checkbox-line,
+  .ledger-signal,
+  .ledger-source,
+  .ledger-result,
+  .comparison-target,
+  .brief-list,
+  .green,
+  .red,
+  .yellow,
+  .blue,
+  .signal.observed,
+  .signal.missing,
+  .signal.unknown {
+    color: #111111 !important;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .subtitle {
+    color: #333333 !important;
+    margin-bottom: 14px;
+  }
+
+  .executive-brief,
+  .signal-list,
+  .ledger,
+  .comparison-table {
+    background: #ffffff !important;
+    border-color: #999999 !important;
+  }
+
+  .ledger-header,
+  .comparison-header {
+    background: #eeeeee !important;
+    color: #111111 !important;
+  }
+
+  .ledger-row,
+  .comparison-row {
+    border-bottom-color: #dddddd !important;
+  }
+
+  .badge {
+    color: #111111 !important;
+    border-color: #555555 !important;
+  }
+}
 </style>
 </head>
 
@@ -1518,6 +1619,7 @@ button:hover {
     <input name="target" placeholder="Enter target domain, e.g. github.com" value="${escapeHtml(target || "")}">
     <input name="compare" placeholder="Compare up to 3: cloudflare.com,nist.gov,nsa.gov" value="${escapeHtml(compareTargets.join(","))}">
     <button type="submit">Run Target Assessment</button>
+    <button type="button" onclick="window.print()">Print Report</button>
     <button type="button" onclick="window.location='/'">Clear</button>
   </form>
 
@@ -1574,7 +1676,7 @@ button:hover {
 
     ${executiveBriefHtml}
 
-    <div class="card span-12">
+    <div class="card span-12 print-section">
       <h2>Evidence Ledger</h2>
       <div class="ledger">
         <div class="ledger-header">
@@ -1729,7 +1831,7 @@ button:hover {
       </div>
     </div>
 
-    <div class="card span-12">
+    <div class="card span-12 print-section">
       <h2>Executive Takeaway</h2>
       <div class="value">
         A modern TLS posture is a prerequisite for PQC migration, but it is not proof of PQC readiness.

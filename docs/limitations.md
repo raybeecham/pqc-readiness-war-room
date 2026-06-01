@@ -58,6 +58,10 @@ Executive Brief Mode summarizes existing dashboard signals for presentation and
 screenshot use. It does not add new evidence, call AI services, store results,
 generate PDFs, verify PQC support, or replace the Evidence Ledger.
 
+Print / Report View is implemented with browser print CSS. It does not create a
+server-side PDF, persist reports, sign reports, or provide an auditable export
+workflow.
+
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic
 scanning, endpoint inventory, vendor evidence, architecture review, or

@@ -112,6 +112,7 @@ The current Worker provides:
   readiness, and crypto-agility status
 - an Executive Summary card for the plain-language posture narrative
 - Executive Brief Mode for screenshot-friendly briefings
+- Print / Report View for browser print or save-as-PDF workflows
 - TLS Modernization Score
 - PQC verification status
 - PQC Migration Readiness analysis
@@ -231,6 +232,21 @@ leadership readouts. It summarizes:
 The brief is generated from the same observed, derived, unknown, not verified,
 and not assessed signals shown elsewhere on the dashboard. It does not add new
 evidence, use AI, store results, generate PDFs, or verify PQC support.
+
+## Print / Report View
+
+The dashboard includes a `Print Report` button that opens the browser print
+dialog. The print stylesheet keeps the report focused on:
+
+- page title
+- Executive Brief
+- Target Comparison, when comparison targets are supplied
+- Evidence Ledger
+- Executive Takeaway
+
+Operational dashboard sections, input controls, roadmap details, and footer text
+are hidden from the printed view. This is browser print support only; the Worker
+does not generate PDFs, store reports, or call an export service.
 
 ## Evidence Ledger
 
@@ -401,8 +417,15 @@ v0.8:
 - screenshot-friendly assessment summary
 - top observed signals and top unknowns
 
+v0.9:
+
+- Print / Report View
+- browser print and save-as-PDF support
+- report-focused stylesheet
+
 Future:
 
+- v1.0 polish and stability
 - Migration Planning
 - CAMM Assessment
 

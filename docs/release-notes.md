@@ -1,5 +1,27 @@
 # Release Notes
 
+## v0.9 - Print / Report View
+
+This release adds a browser print workflow for clean briefing output without
+adding backend export infrastructure.
+
+### Added
+
+- `Print Report` button
+- print stylesheet for report-focused output
+- print view focused on title, Executive Brief, Target Comparison, Evidence
+  Ledger, and Executive Takeaway
+- hidden operational dashboard sections during printing
+
+### Maintained Boundaries
+
+- no PDF generation library
+- no report storage
+- no export backend
+- no external APIs
+- no PQC verification claim
+- no TLS key exchange group enumeration
+
 ## v0.8 - Executive Brief Mode
 
 This release adds a screenshot-friendly brief generated from the same evidence
