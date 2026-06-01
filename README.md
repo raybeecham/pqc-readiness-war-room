@@ -108,7 +108,7 @@ The current Worker provides:
 - PQC verification status
 - PQC Migration Readiness analysis
 - Crypto Discovery evidence model
-- Crypto-Agility Score placeholder
+- Crypto-Agility status placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
 - Protocol Intelligence

@@ -314,7 +314,6 @@ export default {
     const pqcReadinessLevel = pqcVerified ? "VERIFIED" : "NOT VERIFIED";
     const pqcReadinessScore = pqcVerified ? 80 : 0;
 
-    const cryptoAgilityScore = 15;
     const cryptoAgilityStatus = "NOT ASSESSED";
     const cryptoDiscovery = {
       status: "NOT ASSESSED",
@@ -477,7 +476,7 @@ export default {
         modernizationPosture,
         pqcReadinessScore,
         pqcReadinessLevel,
-        cryptoAgilityScore,
+        cryptoAgilityScore: null,
         cryptoAgilityStatus,
         targetAssessment,
         protocol,
@@ -956,12 +955,11 @@ button:hover {
     </div>
 
     <div class="card span-4">
-      <h2>Crypto-Agility Score</h2>
-      <div class="metric yellow">${cryptoAgilityScore}/100</div>
-      <div class="bar">
-        <div class="fill-yellow" style="width:${cryptoAgilityScore}%"></div>
+      <h2>Crypto-Agility Status</h2>
+      <div class="metric yellow">${cryptoAgilityStatus}</div>
+      <div class="small">
+        No score is assigned until discovery, inventory, governance, vendor readiness, and migration planning evidence are assessed.
       </div>
-      <div class="small">Status: <b>${cryptoAgilityStatus}</b></div>
     </div>
 
     <div class="card span-8">
