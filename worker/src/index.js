@@ -303,6 +303,32 @@ export default {
 
     const cryptoAgilityScore = 15;
     const cryptoAgilityStatus = "NOT ASSESSED";
+    const cryptoDiscovery = {
+      status: "NOT ASSESSED",
+      requiredEvidence: [
+        "TLS endpoint inventory",
+        "certificate inventory",
+        "application crypto dependencies",
+        "vendor crypto dependencies",
+        "code and library crypto usage",
+        "data-at-rest encryption dependencies",
+        "key and certificate ownership",
+      ],
+      currentCoverage: [
+        "browser-to-edge TLS metadata",
+        "HTTPS posture signals for a public target",
+        "selected response headers",
+        "Alt-Svc advertisements",
+      ],
+      notCovered: [
+        "internal systems",
+        "source code crypto usage",
+        "embedded keys or certificates",
+        "vendor product crypto",
+        "data-at-rest crypto",
+        "complete key ownership and rotation evidence",
+      ],
+    };
 
     const visibilityImpact = usesHttp3
       ? "HTTP/3 indicates QUIC-based transport. This can reduce traditional TCP-centric inspection assumptions."
@@ -367,7 +393,7 @@ export default {
             method: "GET",
             redirect: "follow",
             headers: {
-              "User-Agent": "PQC-Readiness-War-Room/0.3",
+              "User-Agent": "PQC-Readiness-War-Room/0.4",
             },
           });
 
@@ -490,6 +516,18 @@ export default {
       : analysisLine("No major observed-signal gaps from this assessment");
 
     const readinessUnknownRows = pqcMigrationAnalysis.unknowns
+      .map((item) => analysisLine(`? ${item}`))
+      .join("");
+
+    const cryptoDiscoveryRequiredRows = cryptoDiscovery.requiredEvidence
+      .map((item) => analysisLine(`□ ${item}`))
+      .join("");
+
+    const cryptoDiscoveryCoverageRows = cryptoDiscovery.currentCoverage
+      .map((item) => analysisLine(`✓ ${item}`))
+      .join("");
+
+    const cryptoDiscoveryNotCoveredRows = cryptoDiscovery.notCovered
       .map((item) => analysisLine(`? ${item}`))
       .join("");
 
@@ -970,6 +1008,20 @@ button:hover {
     </div>
 
     <div class="card span-8">
+      <h2>Crypto Discovery</h2>
+      <div class="metric yellow">${cryptoDiscovery.status}</div>
+      <div class="small">
+        Discovery evidence is required before a migration plan can be trusted. This Worker does not perform endpoint inventory, source analysis, uploads, or database-backed discovery.
+      </div>
+      <h3>Required Evidence</h3>
+      <div class="signal-list">${cryptoDiscoveryRequiredRows}</div>
+      <h3>Current Tool Coverage</h3>
+      <div class="signal-list">${cryptoDiscoveryCoverageRows}</div>
+      <h3>Not Covered</h3>
+      <div class="signal-list">${cryptoDiscoveryNotCoveredRows}</div>
+    </div>
+
+    <div class="card span-8">
       <h2>PQC Readiness Analysis</h2>
       <h3>Observed Modernization Evidence</h3>
       <div class="signal-list">${observedReadinessRows}</div>
@@ -1000,7 +1052,7 @@ button:hover {
       <div class="checkbox-line">✓ Phase 1: TLS Modernization</div>
       <div class="checkbox-line">✓ Phase 2: HTTPS Posture Assessment</div>
       <div class="checkbox-line">✓ Phase 3: PQC Readiness Analysis</div>
-      <div class="checkbox-line">□ Phase 4: Cryptographic Discovery</div>
+      <div class="checkbox-line">✓ Phase 4: Crypto Discovery Evidence Model</div>
       <div class="checkbox-line">□ Phase 5: CAMM Assessment</div>
       <div class="checkbox-line">□ Phase 6: Migration Planning</div>
     </div>

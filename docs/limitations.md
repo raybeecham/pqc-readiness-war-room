@@ -10,6 +10,7 @@ PQC Readiness War Room is a posture model, not a full cryptographic scanner.
 - selected target response headers
 - `Alt-Svc` advertisements
 - security header presence
+- discovery evidence requirements
 
 ## What The Worker Cannot Prove
 
@@ -21,12 +22,21 @@ PQC Readiness War Room is a posture model, not a full cryptographic scanner.
 - complete cryptographic inventory
 - vendor PQC readiness
 - organizational crypto-agility
+- source code crypto usage
+- embedded key or certificate usage
+- data-at-rest cryptography coverage
+- internal system crypto dependencies
 
 ## Analysis Boundary
 
 The PQC Migration Readiness label describes migration preparedness from
 observable modernization signals. It does not verify post-quantum cryptography
 support.
+
+The Crypto Discovery card is an evidence model. It lists required evidence,
+current tool coverage, and out-of-scope areas. It does not perform discovery
+against uploaded files, internal systems, repositories, databases, or vendor
+products.
 
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic

@@ -107,6 +107,7 @@ The current Worker provides:
 - TLS Modernization Score
 - PQC verification status
 - PQC Migration Readiness analysis
+- Crypto Discovery evidence model
 - Crypto-Agility Score placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
@@ -215,6 +216,38 @@ Reasoning:
 The readiness label should describe migration preparedness, not verified PQC
 support.
 
+## Crypto Discovery Evidence Model
+
+The dashboard includes a Crypto Discovery card, but it does not perform full
+cryptographic discovery. It identifies evidence needed before a migration plan
+can be trusted.
+
+Required evidence includes:
+
+- TLS endpoint inventory
+- certificate inventory
+- application crypto dependencies
+- vendor crypto dependencies
+- code and library crypto usage
+- data-at-rest encryption dependencies
+- key and certificate ownership
+
+Current tool coverage is limited to:
+
+- browser-to-edge TLS metadata
+- public target HTTPS posture signals
+- selected response headers
+- `Alt-Svc` advertisements
+
+Not covered:
+
+- internal systems
+- source code crypto usage
+- embedded keys or certificates
+- vendor product crypto
+- data-at-rest crypto
+- complete key ownership and rotation evidence
+
 ## Roadmap
 
 v0.1:
@@ -233,7 +266,7 @@ v0.3:
 
 v0.4:
 
-- Crypto Discovery
+- Crypto Discovery Evidence Model
 
 v0.5:
 

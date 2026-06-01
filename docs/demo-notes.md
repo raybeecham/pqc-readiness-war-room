@@ -25,7 +25,14 @@
    Explain that LOW, MEDIUM, or HIGH describes migration preparedness from
    observed modernization signals. It does not mean PQC support was verified.
 
-6. Close with the key takeaway.
+6. Show Crypto Discovery.
+
+   Explain that discovery is marked NOT ASSESSED. The card lists evidence that
+   would be needed before a migration plan can be trusted, while keeping
+   internal systems, source code crypto usage, vendor crypto, and data-at-rest
+   crypto out of scope for this Worker.
+
+7. Close with the key takeaway.
 
    "A modern TLS posture is a prerequisite for PQC migration, but it is not proof of PQC readiness."
 
