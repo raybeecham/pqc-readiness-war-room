@@ -199,6 +199,7 @@ into a short narrative:
 - transport posture
 - PQC verification status
 - migration readiness
+- limited target assessment status, when applicable
 - next validation action
 
 The summary does not add new evidence or change unknown signals into verified

@@ -493,6 +493,10 @@ export default {
           : pqcMigrationAnalysis.level === "MEDIUM"
             ? `Migration readiness is medium because ${cryptoDiscovery.status === "NOT ASSESSED" ? "crypto discovery is not assessed" : "important evidence is still missing"}.`
             : "Migration readiness is low because observed evidence is limited.",
+      target:
+        targetAssessment?.limited
+          ? "Target assessment is limited by denial, challenge, rate-limit, or intermediary response."
+          : null,
       nextAction:
         "Next action: collect endpoint, certificate, vendor, and application crypto evidence.",
     };
@@ -598,8 +602,10 @@ export default {
       executiveSummary.transport,
       executiveSummary.pqc,
       executiveSummary.migration,
+      executiveSummary.target,
       executiveSummary.nextAction,
     ]
+      .filter(Boolean)
       .map((item) => analysisLine(item))
       .join("");
 

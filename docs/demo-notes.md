@@ -7,7 +7,8 @@
 2. Start with the Executive Summary.
 
    Use it to frame the whole demo: transport posture, PQC verification status,
-   migration readiness, and the next validation action.
+   migration readiness, limited target assessment status if present, and the
+   next validation action.
 
 3. Show the browser-to-edge TLS modernization score.
 
