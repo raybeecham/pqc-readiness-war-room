@@ -42,6 +42,10 @@ current tool coverage, and out-of-scope areas. It does not perform discovery
 against uploaded files, internal systems, repositories, databases, or vendor
 products.
 
+The Validation Plan is operational guidance for evidence collection. It does
+not verify that the evidence exists and does not change unknown signals into
+observed signals.
+
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic
 scanning, endpoint inventory, vendor evidence, architecture review, or

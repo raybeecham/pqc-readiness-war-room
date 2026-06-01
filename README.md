@@ -110,6 +110,7 @@ The current Worker provides:
 - PQC verification status
 - PQC Migration Readiness analysis
 - Crypto Discovery evidence model
+- Validation Plan
 - Crypto-Agility status placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
@@ -254,6 +255,30 @@ Not covered:
 - data-at-rest crypto
 - complete key ownership and rotation evidence
 
+## Validation Plan
+
+The dashboard includes a Validation Plan card that turns the unknowns into
+next-step evidence collection.
+
+Priority 1:
+
+- Confirm TLS endpoint inventory
+- Validate certificate inventory
+- Check vendor PQC roadmap
+
+Priority 2:
+
+- Identify application crypto dependencies
+- Map visibility requirements for HTTP/3
+- Define ownership for migration planning
+
+Do not infer:
+
+- ML-KEM support
+- hybrid PQC support
+- ECH support
+- crypto-agility maturity
+
 ## Roadmap
 
 v0.1:
@@ -275,6 +300,10 @@ v0.4:
 - Crypto Discovery Evidence Model
 
 v0.5:
+
+- Validation Plan
+
+Future:
 
 - CAMM Assessment
 

@@ -341,6 +341,24 @@ export default {
         "complete key ownership and rotation evidence",
       ],
     };
+    const validationPlan = {
+      priorityOne: [
+        "Confirm TLS endpoint inventory",
+        "Validate certificate inventory",
+        "Check vendor PQC roadmap",
+      ],
+      priorityTwo: [
+        "Identify application crypto dependencies",
+        "Map visibility requirements for HTTP/3",
+        "Define ownership for migration planning",
+      ],
+      doNotInfer: [
+        "ML-KEM support",
+        "hybrid PQC support",
+        "ECH support",
+        "crypto-agility maturity",
+      ],
+    };
 
     const visibilityImpact = usesHttp3
       ? "HTTP/3 indicates QUIC-based transport. This can reduce traditional TCP-centric inspection assumptions."
@@ -543,6 +561,18 @@ export default {
       .join("");
 
     const cryptoDiscoveryNotCoveredRows = cryptoDiscovery.notCovered
+      .map((item) => analysisLine(`? ${item}`))
+      .join("");
+
+    const validationPriorityOneRows = validationPlan.priorityOne
+      .map((item) => analysisLine(`□ ${item}`))
+      .join("");
+
+    const validationPriorityTwoRows = validationPlan.priorityTwo
+      .map((item) => analysisLine(`□ ${item}`))
+      .join("");
+
+    const validationDoNotInferRows = validationPlan.doNotInfer
       .map((item) => analysisLine(`? ${item}`))
       .join("");
 
@@ -1067,13 +1097,26 @@ button:hover {
       </div>
     </div>
 
+    <div class="card span-7">
+      <h2>Validation Plan</h2>
+      <h3>Priority 1</h3>
+      <div class="signal-list">${validationPriorityOneRows}</div>
+      <h3>Priority 2</h3>
+      <div class="signal-list">${validationPriorityTwoRows}</div>
+      <h3>Do Not Infer</h3>
+      <div class="signal-list">${validationDoNotInferRows}</div>
+      <div class="small">
+        Use this plan to move from posture observations to evidence collection without treating unknown signals as verified.
+      </div>
+    </div>
+
     <div class="card span-6">
       <h2>Platform Roadmap</h2>
       <div class="checkbox-line">✓ Phase 1: TLS Modernization</div>
       <div class="checkbox-line">✓ Phase 2: HTTPS Posture Assessment</div>
       <div class="checkbox-line">✓ Phase 3: PQC Readiness Analysis</div>
       <div class="checkbox-line">✓ Phase 4: Crypto Discovery Evidence Model</div>
-      <div class="checkbox-line">□ Phase 5: CAMM Assessment</div>
+      <div class="checkbox-line">✓ Phase 5: Validation Plan</div>
       <div class="checkbox-line">□ Phase 6: Migration Planning</div>
     </div>
 

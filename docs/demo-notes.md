@@ -34,7 +34,12 @@
    internal systems, source code crypto usage, vendor crypto, and data-at-rest
    crypto out of scope for this Worker.
 
-7. Close with the key takeaway.
+7. Show the Validation Plan.
+
+   Explain that the plan lists next evidence to collect and explicitly says
+   what not to infer from the current posture model.
+
+8. Close with the key takeaway.
 
    "A modern TLS posture is a prerequisite for PQC migration, but it is not proof of PQC readiness."
 
