@@ -1,5 +1,33 @@
 # Release Notes
 
+## v0.6 - Evidence Ledger
+
+This release adds source transparency to the dashboard without expanding the
+tool into a scanner.
+
+### Added
+
+- Evidence Ledger dashboard card
+- source mapping for browser-to-edge metadata
+- source mapping for target fetch and response header signals
+- derived posture model rows for TLS modernization and PQC migration readiness
+- explicit unknown, not verified, and not assessed rows for PQC and
+  crypto-agility gaps
+
+### Maintained Boundaries
+
+- no PQC verification claim
+- no ML-KEM or hybrid PQC proof
+- no ECH proof
+- no TLS key exchange group enumeration
+- no crypto inventory scan
+- no uploads, databases, storage bindings, or external APIs
+
+### Key Takeaway
+
+Every visible claim should be traceable to an observed source, a derived model
+output, or an explicit unknown.
+
 ## v0.5 - Validation Narrative
 
 This release turns the dashboard into a clearer posture narrative while keeping

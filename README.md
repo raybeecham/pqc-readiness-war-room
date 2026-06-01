@@ -116,6 +116,7 @@ The current Worker provides:
 - PQC Migration Readiness analysis
 - Crypto Discovery evidence model
 - Validation Plan
+- Evidence Ledger
 - Crypto-Agility status placeholder
 - target HTTPS posture assessment
 - observed browser-to-edge connection metadata
@@ -208,6 +209,21 @@ into a short narrative:
 
 The summary does not add new evidence or change unknown signals into verified
 signals.
+
+## Evidence Ledger
+
+The dashboard includes an Evidence Ledger that maps visible claims to their
+source:
+
+- Worker request metadata
+- target fetch results
+- target response headers
+- derived posture model outputs
+- signals that are unknown, not verified, or not assessed
+
+The ledger is meant to make the assessment easier to explain and audit. It does
+not create new evidence and does not turn unknown PQC signals into verified
+readiness.
 
 ## PQC Readiness Analysis
 
@@ -322,8 +338,16 @@ v0.5:
 
 - Validation Plan
 
+v0.6:
+
+- Evidence Ledger
+- Signal source transparency
+- observed, derived, unknown, not verified, and not assessed classifications
+
 Future:
 
+- Target Comparison Mode
+- Migration Planning
 - CAMM Assessment
 
 ## Bigger Picture

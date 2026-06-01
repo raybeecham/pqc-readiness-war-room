@@ -46,6 +46,10 @@ The Validation Plan is operational guidance for evidence collection. It does
 not verify that the evidence exists and does not change unknown signals into
 observed signals.
 
+The Evidence Ledger improves traceability by mapping signals to sources and
+classifications. It does not add scanner capability, perform inventory, verify
+PQC support, or prove organizational crypto-agility.
+
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic
 scanning, endpoint inventory, vendor evidence, architecture review, or

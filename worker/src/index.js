@@ -78,6 +78,21 @@ function analysisLine(text) {
   return `<div class="checkbox-line">${text}</div>`;
 }
 
+function evidenceClass(confidence) {
+  return confidence.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+function evidenceRow({ signal, source, result, confidence }) {
+  return `
+    <div class="ledger-row">
+      <div class="ledger-signal">${signal}</div>
+      <div class="ledger-source">${source}</div>
+      <div class="ledger-result">${result}</div>
+      <div><span class="badge ${evidenceClass(confidence)}">${confidence}</span></div>
+    </div>
+  `;
+}
+
 function buildPqcMigrationAnalysis({
   tlsIsModern,
   httpIsModern,
@@ -479,6 +494,135 @@ export default {
       discoveryAssessed: cryptoDiscovery.status !== "NOT ASSESSED",
     });
 
+    const targetWasRejected = targetAssessment?.valid === false;
+    const targetFetchSource = targetWasRejected ? "target validation" : "target fetch";
+    const targetResponseSource = targetWasRejected
+      ? "target validation"
+      : "target fetch response";
+    const targetAltSvcSource = targetWasRejected
+      ? "target validation"
+      : "Alt-Svc response header";
+    const targetHstsSource = targetWasRejected
+      ? "target validation"
+      : "Strict-Transport-Security response header";
+    const targetEvidenceConfidence = targetAssessment ? "Observed" : "Not run";
+    const targetResponseConfidence = targetAssessment?.reachable
+      ? "Observed"
+      : targetAssessment
+        ? "Not observed"
+        : "Not run";
+    const targetReachableResult = targetAssessment
+      ? targetAssessment.reachable
+        ? "Yes"
+        : "No"
+      : "Not run";
+    const targetStatusResult = targetAssessment?.reachable
+      ? String(targetAssessment.status)
+      : targetAssessment
+        ? "No response"
+        : "Not run";
+    const targetAltSvcResult = targetAssessment?.reachable
+      ? targetAssessment.altSvc.toLowerCase().includes("h3")
+        ? "HTTP/3 advertised"
+        : "Not observed"
+      : targetAssessment
+        ? "No response"
+        : "Not run";
+    const targetHstsResult = targetAssessment?.reachable
+      ? targetAssessment.hsts !== "Not observed"
+        ? "Observed"
+        : "Not observed"
+      : targetAssessment
+        ? "No response"
+        : "Not run";
+
+    const evidenceLedger = [
+      {
+        signal: "Browser HTTP protocol",
+        source: "request.cf.httpProtocol",
+        result: protocol,
+        confidence: protocol === "Unknown" ? "Unknown" : "Observed",
+      },
+      {
+        signal: "Browser TLS version",
+        source: "request.cf.tlsVersion",
+        result: tlsVersion,
+        confidence: tlsVersion === "Unknown" ? "Unknown" : "Observed",
+      },
+      {
+        signal: "Browser TLS cipher",
+        source: "request.cf.tlsCipher",
+        result: cipher,
+        confidence: cipher === "Unknown" ? "Unknown" : "Observed",
+      },
+      {
+        signal: "TLS modernization posture",
+        source: "derived from browser-to-edge metadata",
+        result: modernizationPosture,
+        confidence: "Derived",
+      },
+      {
+        signal: "Target HTTPS reachable",
+        source: targetFetchSource,
+        result: targetReachableResult,
+        confidence: targetEvidenceConfidence,
+      },
+      {
+        signal: "Target HTTP status",
+        source: targetResponseSource,
+        result: targetStatusResult,
+        confidence: targetResponseConfidence,
+      },
+      {
+        signal: "Target HTTP/3 advertisement",
+        source: targetAltSvcSource,
+        result: targetAltSvcResult,
+        confidence: targetResponseConfidence,
+      },
+      {
+        signal: "Target HSTS",
+        source: targetHstsSource,
+        result: targetHstsResult,
+        confidence: targetResponseConfidence,
+      },
+      {
+        signal: "PQC migration readiness",
+        source: "derived posture model",
+        result: pqcMigrationAnalysis.level,
+        confidence: "Derived",
+      },
+      {
+        signal: "ML-KEM support",
+        source: "not measured by this Worker",
+        result: "Unknown",
+        confidence: "Not verified",
+      },
+      {
+        signal: "Hybrid PQC support",
+        source: "not measured by this Worker",
+        result: "Unknown",
+        confidence: "Not verified",
+      },
+      {
+        signal: "ECH support",
+        source: "not measured by this Worker",
+        result: "Unknown",
+        confidence: "Not verified",
+      },
+      {
+        signal: "Crypto inventory coverage",
+        source: "not assessed by this Worker",
+        result: "Unknown",
+        confidence: "Not assessed",
+      },
+      {
+        signal: "Organizational crypto-agility",
+        source: "not assessed by this Worker",
+        result: "Unknown",
+        confidence: "Not assessed",
+      },
+    ];
+
     const executiveSummary = {
       transport:
         modernizationPosture === "STRONG"
@@ -608,6 +752,8 @@ export default {
       .filter(Boolean)
       .map((item) => analysisLine(item))
       .join("");
+
+    const evidenceLedgerRows = evidenceLedger.map(evidenceRow).join("");
 
     const targetHtml = targetAssessment
       ? targetAssessment.reachable
@@ -892,6 +1038,13 @@ button:hover {
 .badge.warn { color: #ffd166; }
 .badge.fail { color: #ff4d4d; }
 .badge.info { color: #8ab4ff; }
+.badge.observed { color: #00ffcc; }
+.badge.derived { color: #8ab4ff; }
+.badge.unknown,
+.badge.not-run,
+.badge.not-observed,
+.badge.not-verified,
+.badge.not-assessed { color: #ffd166; }
 
 .pill {
   display: inline-block;
@@ -951,6 +1104,53 @@ button:hover {
 
 .signal.unknown {
   color: #ffd166;
+}
+
+.ledger {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #071014;
+  overflow: hidden;
+}
+
+.ledger-header,
+.ledger-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.8fr 1.3fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  align-items: start;
+}
+
+.ledger-header {
+  color: #88fff0;
+  font-weight: bold;
+  background: #0d171d;
+}
+
+.ledger-row:last-child {
+  border-bottom: none;
+}
+
+.ledger-signal {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.ledger-source,
+.ledger-result {
+  color: #c8d7e1;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .ledger-header {
+    display: none;
+  }
+
+  .ledger-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .warning-box {
@@ -1036,6 +1236,22 @@ button:hover {
       <div class="signal-list">${executiveSummaryRows}</div>
       <div class="small">
         This summary explains the posture model without converting unknown signals into verified readiness.
+      </div>
+    </div>
+
+    <div class="card span-12">
+      <h2>Evidence Ledger</h2>
+      <div class="ledger">
+        <div class="ledger-header">
+          <div>Signal</div>
+          <div>Source</div>
+          <div>Result</div>
+          <div>Confidence</div>
+        </div>
+        ${evidenceLedgerRows}
+      </div>
+      <div class="small">
+        Observed rows come from Worker request metadata or target response headers. Derived rows come from this posture model. Unknown, not verified, and not assessed rows are intentionally not treated as proof.
       </div>
     </div>
 
@@ -1158,7 +1374,8 @@ button:hover {
       <div class="checkbox-line">✓ Phase 3: PQC Readiness Analysis</div>
       <div class="checkbox-line">✓ Phase 4: Crypto Discovery Evidence Model</div>
       <div class="checkbox-line">✓ Phase 5: Validation Plan</div>
-      <div class="checkbox-line">□ Phase 6: Migration Planning</div>
+      <div class="checkbox-line">✓ Phase 6: Evidence Ledger</div>
+      <div class="checkbox-line">□ Phase 7: Migration Planning</div>
     </div>
 
     <div class="card span-6">
