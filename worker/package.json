@@ -1,0 +1,12 @@
+{
+  "name": "pqc-readiness-war-room",
+  "version": "0.1.0",
+  "description": "Edge-based TLS modernization, HTTPS posture, PQC readiness, and crypto-agility model.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}
