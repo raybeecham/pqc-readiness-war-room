@@ -1,5 +1,18 @@
 # Release Notes
 
+## v0.6.1 - Evidence Confidence Polish
+
+This patch tightens Evidence Ledger wording so missing target header signals are
+classified as `Not observed` instead of implying that the signal itself was
+observed.
+
+### Changed
+
+- absent target HTTP/3 advertisement rows now show confidence `Not observed`
+- absent target HSTS rows now show confidence `Not observed`
+- response status rows still show `Observed` when a target response was
+  received
+
 ## v0.6 - Evidence Ledger
 
 This release adds source transparency to the dashboard without expanding the

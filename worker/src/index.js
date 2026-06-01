@@ -528,6 +528,11 @@ export default {
       : targetAssessment
         ? "No response"
         : "Not run";
+    const targetAltSvcConfidence = targetAssessment?.reachable
+      ? targetAssessment.altSvc.toLowerCase().includes("h3")
+        ? "Observed"
+        : "Not observed"
+      : targetResponseConfidence;
     const targetHstsResult = targetAssessment?.reachable
       ? targetAssessment.hsts !== "Not observed"
         ? "Observed"
@@ -535,6 +540,11 @@ export default {
       : targetAssessment
         ? "No response"
         : "Not run";
+    const targetHstsConfidence = targetAssessment?.reachable
+      ? targetAssessment.hsts !== "Not observed"
+        ? "Observed"
+        : "Not observed"
+      : targetResponseConfidence;
 
     const evidenceLedger = [
       {
@@ -577,13 +587,13 @@ export default {
         signal: "Target HTTP/3 advertisement",
         source: targetAltSvcSource,
         result: targetAltSvcResult,
-        confidence: targetResponseConfidence,
+        confidence: targetAltSvcConfidence,
       },
       {
         signal: "Target HSTS",
         source: targetHstsSource,
         result: targetHstsResult,
-        confidence: targetResponseConfidence,
+        confidence: targetHstsConfidence,
       },
       {
         signal: "PQC migration readiness",
