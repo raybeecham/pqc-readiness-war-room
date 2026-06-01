@@ -54,6 +54,10 @@ Target Comparison Mode compares public HTTPS posture signals for a small set of
 user-supplied hostnames. It does not store results, compare private systems,
 verify PQC support, or enumerate TLS key exchange groups.
 
+Executive Brief Mode summarizes existing dashboard signals for presentation and
+screenshot use. It does not add new evidence, call AI services, store results,
+generate PDFs, verify PQC support, or replace the Evidence Ledger.
+
 Use the tool to explain observed signals, unknown signals, and next-step
 validation needs. Do not use it as a replacement for active cryptographic
 scanning, endpoint inventory, vendor evidence, architecture review, or

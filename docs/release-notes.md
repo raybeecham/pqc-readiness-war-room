@@ -1,5 +1,31 @@
 # Release Notes
 
+## v0.8 - Executive Brief Mode
+
+This release adds a screenshot-friendly brief generated from the same evidence
+already shown in the dashboard.
+
+### Added
+
+- Executive Brief dashboard card
+- assessment scope summary
+- primary and compared target summary
+- posture summary for transport, PQC verification, migration readiness, and
+  target posture
+- top observed signals
+- top unknowns
+- recommended next action
+- key takeaway
+
+### Maintained Boundaries
+
+- no AI-generated analysis
+- no storage
+- no uploads
+- no PDF generation
+- no PQC verification claim
+- no TLS key exchange group enumeration
+
 ## v0.7 - Target Comparison Mode
 
 This release adds side-by-side comparison for public HTTPS posture signals while

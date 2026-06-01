@@ -10,7 +10,7 @@ https://pqc-readiness-war-room.raybeecham2009.workers.dev
 
 ## Release Notes
 
-- [v0.5 - Validation Narrative](docs/release-notes.md)
+- [Release Notes](docs/release-notes.md)
 
 ## Project Overview
 
@@ -111,6 +111,7 @@ The current Worker provides:
 - executive summary cards for TLS modernization, PQC verification, migration
   readiness, and crypto-agility status
 - an Executive Summary card for the plain-language posture narrative
+- Executive Brief Mode for screenshot-friendly briefings
 - TLS Modernization Score
 - PQC verification status
 - PQC Migration Readiness analysis
@@ -210,6 +211,26 @@ into a short narrative:
 
 The summary does not add new evidence or change unknown signals into verified
 signals.
+
+## Executive Brief Mode
+
+The dashboard includes an Executive Brief card for demos, screenshots, and
+leadership readouts. It summarizes:
+
+- assessment scope
+- primary target
+- compared targets
+- browser-to-edge posture
+- target posture summary
+- PQC verification status
+- top observed signals
+- top unknowns
+- recommended next action
+- key takeaway
+
+The brief is generated from the same observed, derived, unknown, not verified,
+and not assessed signals shown elsewhere on the dashboard. It does not add new
+evidence, use AI, store results, generate PDFs, or verify PQC support.
 
 ## Evidence Ledger
 
@@ -373,6 +394,12 @@ v0.6:
 v0.7:
 
 - Target Comparison Mode
+
+v0.8:
+
+- Executive Brief Mode
+- screenshot-friendly assessment summary
+- top observed signals and top unknowns
 
 Future:
 

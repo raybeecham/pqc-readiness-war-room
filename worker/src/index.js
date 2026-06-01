@@ -89,7 +89,7 @@ async function assessTarget(target) {
       method: "GET",
       redirect: "follow",
       headers: {
-        "User-Agent": "PQC-Readiness-War-Room/0.7",
+        "User-Agent": "PQC-Readiness-War-Room/0.8",
       },
     });
 
@@ -200,6 +200,14 @@ function comparisonBadge(label, cls) {
 
 function comparisonObservedBadge(observed) {
   return comparisonBadge(observed ? "Observed" : "Not observed", observed ? "pass" : "not-observed");
+}
+
+function briefList(items) {
+  return `
+    <ul class="brief-list">
+      ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+    </ul>
+  `;
 }
 
 function comparisonRow(assessment, role) {
@@ -771,6 +779,62 @@ export default {
         "Next action: collect endpoint, certificate, vendor, and application crypto evidence.",
     };
 
+    const executiveBriefObservedSignals = [
+      tlsIsModern ? "TLS 1.3 observed on the browser-to-edge connection" : null,
+      usesHttp3
+        ? "HTTP/3 observed on the browser-to-edge connection"
+        : usesHttp2
+          ? "HTTP/2 observed on the browser-to-edge connection"
+          : null,
+      cipherIsAead ? "AEAD-like cipher observed on the browser-to-edge connection" : null,
+      targetAssessment?.reachable
+        ? `${targetAssessment.target} HTTPS endpoint reachable`
+        : null,
+      targetAssessment?.reachable && targetAssessment.hsts !== "Not observed"
+        ? `${targetAssessment.target} HSTS observed`
+        : null,
+      targetAssessment?.reachable && targetAssessment.csp !== "Not observed"
+        ? `${targetAssessment.target} Content Security Policy observed`
+        : null,
+    ]
+      .filter(Boolean)
+      .slice(0, 5);
+
+    const executiveBriefUnknowns = [
+      "ML-KEM support",
+      "Hybrid PQC support",
+      "ECH support",
+      "Crypto inventory coverage",
+      "Organizational crypto-agility",
+    ];
+
+    const executiveBriefScope =
+      "Browser-to-edge metadata and public HTTPS response headers.";
+    const executiveBriefPrimaryTarget = target || "No primary target selected";
+    const executiveBriefComparedTargets = compareTargets.length
+      ? compareTargets.join(", ")
+      : "None";
+    const executiveBriefTargetSummary = targetAssessment
+      ? targetAssessment.reachable
+        ? `${targetAssessment.target} returned HTTP ${targetAssessment.status} with a ${targetAssessment.score}/100 public HTTPS posture score${targetAssessment.limited ? " and a limited assessment warning" : ""}.`
+        : `${targetAssessment.target} could not be assessed: ${targetAssessment.error}.`
+      : "No target assessment has been run.";
+    const executiveBriefSummary = [
+      executiveSummary.transport,
+      executiveSummary.pqc,
+      executiveSummary.migration,
+      executiveSummary.target,
+      executiveBriefTargetSummary,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const executiveBriefObservedRows = briefList(
+      executiveBriefObservedSignals.length
+        ? executiveBriefObservedSignals
+        : ["No positive observed signals selected for the brief"],
+    );
+    const executiveBriefUnknownRows = briefList(executiveBriefUnknowns);
+
     const recommendation =
       tlsModernizationScore >= 75
         ? "Strong TLS modernization posture. Next step: inventory cryptographic dependencies, validate vendor PQC roadmaps, and map visibility requirements."
@@ -915,6 +979,45 @@ export default {
         </div>
       `
       : "";
+    const executiveBriefHtml = `
+      <div class="card span-12 executive-brief">
+        <h2>Executive Brief</h2>
+        <div class="brief-grid">
+          <div>
+            <h3>Scope</h3>
+            <div class="value">${escapeHtml(executiveBriefScope)}</div>
+          </div>
+          <div>
+            <h3>Targets</h3>
+            <div class="kv"><span class="label">Primary:</span><span class="value">${escapeHtml(executiveBriefPrimaryTarget)}</span></div>
+            <div class="kv"><span class="label">Compared:</span><span class="value">${escapeHtml(executiveBriefComparedTargets)}</span></div>
+          </div>
+          <div class="brief-wide">
+            <h3>Summary</h3>
+            <div class="value">${escapeHtml(executiveBriefSummary)}</div>
+          </div>
+          <div>
+            <h3>Top Observed Signals</h3>
+            ${executiveBriefObservedRows}
+          </div>
+          <div>
+            <h3>Top Unknowns</h3>
+            ${executiveBriefUnknownRows}
+          </div>
+          <div class="brief-wide">
+            <h3>Recommended Next Action</h3>
+            <div class="value">Collect endpoint, certificate, vendor, and application crypto evidence.</div>
+          </div>
+          <div class="brief-wide">
+            <h3>Key Takeaway</h3>
+            <div class="value">A modern TLS posture is a prerequisite for PQC migration, but it is not proof of PQC readiness.</div>
+          </div>
+        </div>
+        <div class="small">
+          This brief is generated from the same observed, derived, unknown, not verified, and not assessed signals shown elsewhere on the dashboard.
+        </div>
+      </div>
+    `;
 
     const targetHtml = targetAssessment
       ? targetAssessment.reachable
@@ -1341,6 +1444,27 @@ button:hover {
   padding: 10px;
 }
 
+.executive-brief {
+  border-color: rgba(138, 180, 255, 0.85);
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.brief-wide {
+  grid-column: span 2;
+}
+
+.brief-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #c8d7e1;
+  line-height: 1.6;
+}
+
 @media (max-width: 900px) {
   .ledger-header,
   .comparison-header {
@@ -1350,6 +1474,14 @@ button:hover {
   .ledger-row,
   .comparison-row {
     grid-template-columns: 1fr;
+  }
+
+  .brief-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brief-wide {
+    grid-column: span 1;
   }
 }
 
@@ -1439,6 +1571,8 @@ button:hover {
         This summary explains the posture model without converting unknown signals into verified readiness.
       </div>
     </div>
+
+    ${executiveBriefHtml}
 
     <div class="card span-12">
       <h2>Evidence Ledger</h2>
@@ -1579,7 +1713,8 @@ button:hover {
       <div class="checkbox-line">✓ Phase 5: Validation Plan</div>
       <div class="checkbox-line">✓ Phase 6: Evidence Ledger</div>
       <div class="checkbox-line">✓ Phase 7: Target Comparison Mode</div>
-      <div class="checkbox-line">□ Phase 8: Migration Planning</div>
+      <div class="checkbox-line">✓ Phase 8: Executive Brief Mode</div>
+      <div class="checkbox-line">□ Phase 9: Migration Planning</div>
     </div>
 
     <div class="card span-6">
