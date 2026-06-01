@@ -104,6 +104,8 @@ Examples:
 
 The current Worker provides:
 
+- executive summary cards for TLS modernization, PQC verification, migration
+  readiness, and crypto-agility status
 - TLS Modernization Score
 - PQC verification status
 - PQC Migration Readiness analysis

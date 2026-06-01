@@ -715,6 +715,7 @@ button:hover {
   font-size: 19px;
 }
 
+.span-3 { grid-column: span 3; }
 .span-4 { grid-column: span 4; }
 .span-5 { grid-column: span 5; }
 .span-6 { grid-column: span 6; }
@@ -723,7 +724,7 @@ button:hover {
 .span-12 { grid-column: span 12; }
 
 @media (max-width: 1100px) {
-  .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 {
+  .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 {
     grid-column: span 12;
   }
 }
@@ -744,6 +745,11 @@ button:hover {
   font-size: 38px;
   font-weight: bold;
   margin: 8px 0;
+}
+
+.summary-card .metric {
+  font-size: 31px;
+  overflow-wrap: anywhere;
 }
 
 .green { color: #00ffcc; }
@@ -921,16 +927,16 @@ button:hover {
 
   <div class="grid">
 
-    <div class="card span-4">
-      <h2>TLS Modernization Score</h2>
-      <div class="metric ${tlsModernizationScore >= 75 ? "green" : tlsModernizationScore >= 55 ? "yellow" : "red"}">${tlsModernizationScore}/100</div>
+    <div class="card summary-card span-3">
+      <h2>TLS Modernization</h2>
+      <div class="metric ${tlsModernizationScore >= 75 ? "green" : tlsModernizationScore >= 55 ? "yellow" : "red"}">${modernizationPosture}</div>
       <div class="bar">
         <div class="${tlsModernizationScore >= 75 ? "fill" : tlsModernizationScore >= 55 ? "fill-yellow" : "fill-red"}" style="width:${tlsModernizationScore}%"></div>
       </div>
-      <div class="small">Browser-to-edge posture: <b>${modernizationPosture}</b></div>
+      <div class="small">Browser-to-edge score: <b>${tlsModernizationScore}/100</b></div>
     </div>
 
-    <div class="card span-4">
+    <div class="card summary-card span-3">
       <h2>PQC Verification</h2>
       <div class="metric ${pqcVerified ? "green" : "red"}">${pqcReadinessLevel}</div>
       <div class="bar">
@@ -942,7 +948,7 @@ button:hover {
       </div>
     </div>
 
-    <div class="card span-4">
+    <div class="card summary-card span-3">
       <h2>PQC Migration Readiness</h2>
       <div class="metric ${pqcMigrationAnalysis.level === "HIGH" ? "green" : pqcMigrationAnalysis.level === "MEDIUM" ? "yellow" : "red"}">${pqcMigrationAnalysis.level}</div>
       <div class="bar">
@@ -954,7 +960,7 @@ button:hover {
       </div>
     </div>
 
-    <div class="card span-4">
+    <div class="card summary-card span-3">
       <h2>Crypto-Agility Status</h2>
       <div class="metric yellow">${cryptoAgilityStatus}</div>
       <div class="small">
